@@ -1,11 +1,27 @@
-{% for piece in data.pieces %}
-    <h4 class="people">
-        {% set image = apos.images.first(piece.thumbnail) %}
-        {% if image %}
-            <img src="{{ apos.attachments.url(image, { size: 'one-sixth' }) }}" />
-        {% endif %}
-        <a href="{{ piece._url }}">{{ piece.title }}</a>
-    </h4>
-{% endfor %}
-{% import 'apostrophe-pager:macros.html' as pager with context %}
-{{ pager.render({ page: data.currentPage, total: data.totalPages }, data.url) }}
+{# indexAjax.html #}
+
+{# Filter by tag. Note this is OUTSIDE data-apos-ajax-append, so it gets REFRESHED #}
+<ul class="tag-filters">
+    {% for tag in data.piecesFilters.tags %}
+        <li><a href="{{ data.url | build({ tags: tag.value }) }}">{{ tag.label }}</a></li>
+    {% endfor %}
+</ul>
+
+{# New stuff gets appended to this element #}
+<div data-apos-ajax-append>
+    {% for piece in data.pieces %}
+        <h4 class="people">
+            {% set image = apos.images.first(piece.thumbnail) %}
+            {% if image %}
+                <img src="{{ apos.attachments.url(image, { size: 'one-sixth' }) }}" />
+            {% endif %}
+            <a href="{{ piece._url }}">{{ piece.title }}</a>
+        </h4>
+    {% endfor %}
+</div>
+
+{# Load More button. Also outside data-apos-ajax-append, so it gets refreshed #}
+{% if data.currentPage < data.totalPages %}
+    {# "Load More" button with the "append=1" flag #}
+    <a data-apos-ajax-infinite-scroll href="{{ data.url }} | build({ page: data.currentPage + 1, append: 1 })">Load More...</a>
+{% endif %}
